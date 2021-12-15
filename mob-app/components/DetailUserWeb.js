@@ -4,19 +4,8 @@ import { Platform, View, StyleSheet, ScrollView , SafeAreaView , ActivityIndicat
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RenderHtml from 'react-native-render-html';
-import MapView, {Marker, Geojson} from 'react-native-maps';
 import Separator from './Separator';
 import mainColor from './Constants';
-
-if (Platform.OS === 'ios') {
-  // do something for ios
-} else if (Platform.OS === 'android') {
-  // other thing for android
-} else if (Platform.OS === 'web') {
-  // it's on web!
-} else {
-  // you probably won't end up here unless you support another platform!
-}
 
 const Email = ({ containerStyle, onPressEmail, name, email, index }) => (
     <TouchableOpacity onPress={() => onPressEmail(email)}>
@@ -179,23 +168,6 @@ const DetailUser = (props) => {
                     country={user.country}
                 />
             </View>
-            <View style={styles.maps}>
-                <MapView
-                    style={styles.map}
-                    initialRegion={{
-                    latitude: Number(user.latitude),
-                    longitude: Number(user.longitude),
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
-                    }}
-                    showsUserLocation={true}
-                    showsMyLocationButton={true}
-                    showsBuildings={true}
-                    zoomEnabled={true}
-                    scrollEnabled={true}
-                    moveOnMarkerPress={true}
-                    zoomControlEnabled={true}/>
-                </View>
         </ScrollView>
       </View>
     </View>
