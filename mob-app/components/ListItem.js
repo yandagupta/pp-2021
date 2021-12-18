@@ -4,14 +4,15 @@ import { View, StyleSheet, ScrollView , RefreshControl, ActivityIndicator} from 
 import { useNavigation } from '@react-navigation/native';
 const ListItems = (item) => {
     const navigation = useNavigation();
+    const { id, data} = item;
     return (
-        <ListItem key={item.id} bottomDivider onPress={() => {
-            navigation.navigate('Details', item );
+        <ListItem key={id} bottomDivider onPress={() => {
+            navigation.navigate('Details', data );
           }}>
-            <Avatar rounded containerStyle={{ backgroundColor: "#BDBDBD" }} title={item.name.charAt(0)} source={{uri: ''}} />
+            <Avatar rounded containerStyle={{ backgroundColor: "#BDBDBD" }} title={data.name.charAt(0)}/>
             <ListItem.Content>
-            <ListItem.Title>{item.name}</ListItem.Title>
-            <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
+            <ListItem.Title>{data.name}</ListItem.Title>
+            <ListItem.Subtitle>{data.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
         </ListItem>
     )

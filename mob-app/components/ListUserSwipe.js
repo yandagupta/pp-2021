@@ -1,79 +1,90 @@
-import React,  { useState, useEffect , useContext } from 'react';
+import React,  { useState, useEffect, useRef} from 'react';
 import { LayoutAnimation, SafeAreaView, StyleSheet, ScrollView , RefreshControl, ActivityIndicator } from 'react-native';
-import {
-  SwipeableFlatList,
-  SwipeableQuickActionButton,
-  SwipeableQuickActions,
-} from 'react-native-swipe-list';
-import { useNavigation } from '@react-navigation/native';
+import { SwipeableFlatList, SwipeableQuickActionButton, SwipeableQuickActions } from 'react-native-swipe-list';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ListItems from './ListItem';
-
+import "../config/FirebaseInitialize";
+import { doc, getDocs, getFirestore, deleteDoc, collection } from "firebase/firestore";
+const db = getFirestore();
 const ListUserSwipe = (props) => {
-  const { title } = props;
   const [refreshing, setRefreshing] = useState(true);
   const [lists, setLists] = useState([]);
   const navigation = useNavigation();
-
-  const fetchData = () => {
-    fetch('https://61b6be92c95dd70017d40fe5.mockapi.io/api/v1/users')
-      .then((response) => response.json())
-      .then((response) => {
-        setRefreshing(false);
-        setLists(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
+  const scrollViewRef = useRef(null);
+  const fetchData = async () => {
+    const docRef = collection(db, "mob_app", 'users','users');
+    const docSnap = await getDocs(docRef);
+    if (docSnap) {
+      let listings = docSnap.docs.map((doc) => ({ id: doc.id, data: doc.data() }));
+      setLists(listings);
+      console.log('load data')
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!");
+      setLists([]);
+    }
+    
+    setRefreshing(false);
+   
+  }
 
   useEffect(() => {
-    fetchData();
-  }, [])
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchData();
+      //Put your Data loading function here instead of my loadData()
+    });
+
+    return unsubscribe;
+
+  }, [navigation]);
+
+  const deleteUser = async (item) => {
+    await deleteDoc(doc(db,  "mob_app", 'users', 'users' , item));
+    setRefreshing(true);
+  }
 
   return (
     <SafeAreaView style={styles.container}>
         {refreshing ? <ActivityIndicator /> : null}
             <SwipeableFlatList
                 data={lists}
+                closeOnScroll
                 renderItem={({ item }) => <ListItems {...item} />}
                 keyExtractor={index => index.id}
                 refreshControl={<RefreshControl refreshing={refreshing} 
                 onRefresh={fetchData} />} 
-                renderRightActions={({ item }) => (
-                <SwipeableQuickActions>
-                    <SwipeableQuickActionButton
-                        onPress={() => {
-                            LayoutAnimation.configureNext(
-                            LayoutAnimation.Presets.easeInEaseOut,
-                            );
-                            navigation.navigate('Details', item );
-                        }}
-                        text={<MaterialCommunityIcons name="trash-can-outline" size={14}/>}
-                        textStyle={{ fontWeight: 'bold', color: 'white' }}
-                        style={[styles.backRightBtn, styles.backRightBtnLeft]}
-                    />
-                    <SwipeableQuickActionButton
-                        onPress={() => {
-                            LayoutAnimation.configureNext(
-                            LayoutAnimation.Presets.easeInEaseOut,
-                            );
-                            navigation.navigate('Details', item );
-                        }}
-                        text={<MaterialCommunityIcons name="grease-pencil" size={14}/>}
-                        textStyle={{ fontWeight: 'bold', color: 'white' }}
-                        style={[styles.backRightBtn, styles.backRightBtnRight]}
-                    />
-                </SwipeableQuickActions>
-                )}
-                /*renderLeftActions={({ item }) => (
-                <SwipeableQuickActions>
-                    <SwipeableQuickActionButton onPress={() => {}} text="Other" />
-                    <SwipeableQuickActionButton onPress={() => {}} text="Flag" />
-                    <SwipeableQuickActionButton onPress={() => {}} text="Archive" />
-                </SwipeableQuickActions>
-                )}
-                */
+                onEndReached={fetchData}
+                onEndReachedThreshold={0.5}
+                extraData={refreshing}
+                renderRightActions={({item}) => {
+                  return (
+                    <SwipeableQuickActions>
+                        <SwipeableQuickActionButton
+                            onPress={() => {
+                                LayoutAnimation.configureNext(
+                                LayoutAnimation.Presets.easeInEaseOut,
+                                );
+                                deleteUser(item.id);
+                            }}
+                            text={<MaterialCommunityIcons name="trash-can-outline" size={14}/>}
+                            textStyle={{ fontWeight: 'bold', color: 'white' }}
+                            style={[styles.backRightBtn, styles.backRightBtnLeft]}
+                        />
+                        <SwipeableQuickActionButton
+                            onPress={() => {
+                                LayoutAnimation.configureNext(
+                                LayoutAnimation.Presets.easeInEaseOut,
+                                );
+                                navigation.navigate('Create', item );
+                            }}
+                            text={<MaterialCommunityIcons name="grease-pencil" size={14}/>}
+                            textStyle={{ fontWeight: 'bold', color: 'white' }}
+                            style={[styles.backRightBtn, styles.backRightBtnRight]}
+                        />
+                    </SwipeableQuickActions>
+                    )
+                }}
             />
     </SafeAreaView>
   );
@@ -91,13 +102,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         flex: 1,
-        paddingLeft: 15,
-        paddingRight: 15
+        paddingLeft: 20,
+        paddingRight: 20
     },
     backRightBtnLeft: {
         backgroundColor: 'gray',
         borderRightWidth: 1,  
-        borderRightStyle: 'solid',
+        borderStyle: "solid",
         borderRightColor: '#a7a7a796',
     },
     backRightBtnRight: {

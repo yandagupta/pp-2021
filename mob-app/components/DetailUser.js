@@ -120,18 +120,30 @@ const DetailUser = (props) => {
   const { width } = useWindowDimensions();
 
   useEffect(() => {
-   
+    console.log(user)
+    console.log('user')
   }, [])
 
   return (
     <View style={styles.container}>
       <View style={styles.Detail}>
         <ScrollView>
-            <Image
-                source={{ uri: user.avatar_url }}
-                style={styles.image}
-                PlaceholderContent={<ActivityIndicator />}
-            />
+            {
+              (user.avatar_url) ? (
+                <Image
+                source={{uri: user.avatar_url}}
+                  style={styles.image}
+                  PlaceholderContent={<ActivityIndicator />}
+              />
+              ): (
+                <Image
+                    source={{uri:process.env.AVATAR}}
+                    style={styles.image}
+                    PlaceholderContent={<ActivityIndicator />}
+                />
+              )
+            }
+            
             <View style={[styles.wrapper]}>
                 <Text style={styles.title}>{user.name}</Text>
                 <View style={styles.content}>
