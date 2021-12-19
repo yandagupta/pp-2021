@@ -25,5 +25,5 @@ OR
 npm start 
 ```
 
-# Scan Barcode with your expo app in your phone 
-# Good Lock
+1. Scan Barcode with your expo app in your phone 
+2. Good Luck
