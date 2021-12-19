@@ -16,19 +16,14 @@ const CreateUser = (props) => {
     const { item }  = props;
     const scrollRef = useRef();
     const [image, setImage] = useState(null);
-    const [name, setName] = useState(null);
-    const [subtitle, setSubtitle] = useState(null);
-    const [address, setAddress] = useState(null);
-    const [email, setEmail] = useState(null);
-    const [telp, setTelp] = useState(null);
-    const [body, setBody] = useState(null);
     const [success, setSuccess] = useState([]);
     const [errors, setErrors] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [transferred, setTransferred] = useState(0);
     const [saving, setSaving] = useState(0);
-    const [avatar, setAvatar] = useState('');
     const [id, setId] = useState(item);
+    const initialFormState = { name: '', subtitle: '' , telp: '', address: '', body: '', avatar_url: ''}
+    const [user, setUser] = useState(initialFormState);
     
     useEffect(() => {
         (async () => {
@@ -47,26 +42,19 @@ const CreateUser = (props) => {
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         const docState = docSnap.data();
-                        setName(docState.name);
-                        setSubtitle(docState.subtitle);
-                        setTelp(docState.telp);
-                        setAddress(docState.address);
-                        setEmail(docState.email);
-                        setBody(docState.body);
-                        setAvatar(docState.avatar_url)
+                        setUser(docState)
+
                     } else {
                         // doc.data() will be undefined in this case
                         console.log("No such document!");
                     }
                 } catch (error) {
                     console.log('error', error)
-                }
-                
-
-                
+                }  
             }
             
         })();
+
     }, [id]);
 
     const pickImage = async () => {
@@ -97,7 +85,6 @@ const CreateUser = (props) => {
             await uploadBytes(storageRef, blob).then(async snapshot=> {
                 avatar_uri = await getDownloadURL(snapshot.ref).then(downloadURL => {
                     console.log('downloadURL', downloadURL)
-                    setAvatar(downloadURL);
                     return downloadURL;
                 });
                 
@@ -125,21 +112,13 @@ const CreateUser = (props) => {
 
     const submitData = async () => {
         setSaving(true);
-        console.log('before upload', avatar)
-        let avatar_url = avatar;
+        console.log('before upload', user.avatar_url)
+        let avatar_url = user.avatar_url;
         if(image) avatar_url = await uploadImage();
         console.log('after upload', avatar_url)
 
         try {
-            let fields = {
-                name,
-                email,
-                address,
-                telp,
-                body,
-                subtitle,
-            };
-
+            let fields = user;
             if(avatar_url != '') fields = {
                 ...fields,
                 ...{avatar_url: avatar_url}
@@ -180,6 +159,11 @@ const CreateUser = (props) => {
         });
     }
 
+    const onInputChange = (name, value) => {
+        setUser({ ...user, [name]: value })
+        console.log(user)
+    }
+    
     return (
         <View style={styles.container}>
             <ScrollView ref={scrollRef} style={{marginTop: 10}}>
@@ -193,18 +177,19 @@ const CreateUser = (props) => {
                     })}
 
                 </View>
-                <Input defaultValue={name} onChangeText={text => setName(text)} placeholder="Masukkan Nama"/>    
-                <Input defaultValue={subtitle} onChangeText={text => setSubtitle(text)} placeholder="Jenis Pekerjaan"/>    
-                <Input defaultValue={address} onChangeText={text => setAddress(text)} placeholder="Alamat"/>    
-                <Input defaultValue={email} onChangeText={text => setEmail(validation(text, 'email'))} placeholder="Email"/>    
-                <Input defaultValue={telp} onChangeText={text => setTelp(text)} placeholder="Telp."/>    
+                <Input label="Name" defaultValue={user.name} onChangeText={(value) => {onInputChange('name', value)}} placeholder="Masukkan Nama"/>    
+                <Input label="Pekerjaan" defaultValue={user.subtitle} onChangeText={(value) => {onInputChange('subtitle', value)}} placeholder="Jenis Pekerjaan"/>    
+                <Input label="Alamat" defaultValue={user.address} onChangeText={(value) => {onInputChange('address', value)}} placeholder="Alamat"/>    
+                <Input label="Email" defaultValue={user.email} onChangeText={(value) => {onInputChange('email', value)}} placeholder="Email"/>    
+                <Input label="Telp." keyboardType="numeric" defaultValue={user.telp} onChangeText={(value) => {onInputChange('telp', value)}} placeholder="Telp."/>    
                 <Input
+                    label="Biodata"
                     placeholder="Body"
                     multiline={true}
                     numberOfLines={3}
-                    style={{ height:100, textAlignVertical: 'top',}}
-                    onChangeText={text => setBody(text)}
-                    defaultValue={body}
+                    style={{ height: 100, textAlignVertical: 'top', }}
+                    onChangeText={(value) => {onInputChange('body', value)}}
+                    defaultValue={ user.body}
                     />
                 
                 <TouchableOpacity style={styles.selectButton} onPress={pickImage}>

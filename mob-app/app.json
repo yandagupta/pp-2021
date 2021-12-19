@@ -17,9 +17,13 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mahadewa.pp2021",
+      "buildNumber": "1.0.0"
     },
     "android": {
+      "package": "com.mahadewa.pp2021",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
@@ -38,3 +42,5 @@
     ]
   }
 }
+
+

@@ -2,6 +2,7 @@ import React,  { useState, useEffect, useRef} from 'react';
 import { LayoutAnimation, SafeAreaView, StyleSheet, ScrollView , RefreshControl, ActivityIndicator } from 'react-native';
 import { SwipeableFlatList, SwipeableQuickActionButton, SwipeableQuickActions } from 'react-native-swipe-list';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import _ from 'lodash';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ListItems from './ListItem';
 import "../config/FirebaseInitialize";
@@ -17,8 +18,10 @@ const ListUserSwipe = (props) => {
     const docSnap = await getDocs(docRef);
     if (docSnap) {
       let listings = docSnap.docs.map((doc) => ({ id: doc.id, data: doc.data() }));
+      listings = _.compact(listings);
+      
       setLists(listings);
-      console.log('load data')
+      console.log('load data', listings)
     } else {
       // doc.data() will be undefined in this case
       console.log("No such document!");
@@ -37,7 +40,7 @@ const ListUserSwipe = (props) => {
 
     return unsubscribe;
 
-  }, [navigation]);
+  }, [navigation, refreshing]);
 
   const deleteUser = async (item) => {
     await deleteDoc(doc(db,  "mob_app", 'users', 'users' , item));
